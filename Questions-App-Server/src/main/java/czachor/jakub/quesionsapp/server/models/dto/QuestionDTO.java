@@ -1,10 +1,12 @@
 package czachor.jakub.quesionsapp.server.models.dto;
 
 import czachor.jakub.quesionsapp.server.models.QuestionState;
+import lombok.Data;
 
 import java.util.List;
 import java.util.Map;
 
+@Data
 public class QuestionDTO {
     private Long id;
     private String question;
