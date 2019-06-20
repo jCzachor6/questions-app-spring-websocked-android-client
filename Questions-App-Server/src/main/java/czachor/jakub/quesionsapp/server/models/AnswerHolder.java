@@ -9,5 +9,5 @@ import java.util.Map;
 public class AnswerHolder {
     private Question question;
     private QuestionState state;
-    private Map<List<Long>, Long> answers;
+    private Map<List<Long>, Long> answered;
 }
