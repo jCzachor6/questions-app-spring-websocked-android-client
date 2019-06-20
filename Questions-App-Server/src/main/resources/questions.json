@@ -1,0 +1,61 @@
+[
+  {
+    "id": 0,
+    "question": "pytanie pierwsze?",
+    "answers": [
+      "jeden1",
+      "dwa1",
+      "trzy1",
+      "cztery1"
+    ],
+    "correctAnswers": [
+      0
+    ],
+    "timeInSeconds": 30
+  },
+  {
+    "id": 1,
+    "question": "pytanie drugie?",
+    "answers": [
+      "jeden2",
+      "dwa2",
+      "trzy2",
+      "cztery2"
+    ],
+    "correctAnswers": [
+      0,
+      1
+    ],
+    "timeInSeconds": 60
+  },
+  {
+    "id": 2,
+    "question": "pytanie trzecie?",
+    "answers": [
+      "jeden3",
+      "dwa3",
+      "trzy3",
+      "cztery3"
+    ],
+    "correctAnswers": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "timeInSeconds": 15
+  },
+  {
+    "id": 3,
+    "question": "pytanie czwarte?",
+    "answers": [
+      "jeden4",
+      "dwa4",
+      "trzy4",
+      "cztery4"
+    ],
+    "correctAnswers": [
+    ],
+    "timeInSeconds": 25
+  }
+]
