@@ -65,4 +65,8 @@ public class AnswersApplication extends Application {
     public Subscriptions getSubscriptions() {
         return subscriptions;
     }
+
+    public DaoSession getDaoSession() {
+        return daoSession;
+    }
 }
