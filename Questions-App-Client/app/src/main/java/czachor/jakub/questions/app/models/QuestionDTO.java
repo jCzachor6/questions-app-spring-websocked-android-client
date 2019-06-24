@@ -1,9 +1,10 @@
 package czachor.jakub.questions.app.models;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-public class QuestionDTO {
+public class QuestionDTO implements Serializable {
     private Long id;
     private String question;
     private List<String> answers;

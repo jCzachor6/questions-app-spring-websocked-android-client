@@ -8,8 +8,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Mapper {
-    public static List<QuestionLookupDTO> map(List<AnswerHolder> questions) {
+    public static List<QuestionLookupDTO> mapLookup(List<AnswerHolder> questions) {
         return questions.stream().map(Mapper::mapLookup).collect(Collectors.toList());
+    }
+
+    public static List<QuestionDTO> map(List<AnswerHolder> questions) {
+        return questions.stream().map(Mapper::map).collect(Collectors.toList());
     }
 
     public static QuestionDTO map(AnswerHolder answerHolder) {
