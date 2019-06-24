@@ -6,9 +6,11 @@ import czachor.jakub.questions.app.models.sqlite.Answer;
 public class Mapper {
     public static AnswerDto map(Answer answer) {
         AnswerDto dto = new AnswerDto();
-        dto.setAnswer(answer.getAnswer());
-        dto.setId(answer.getId());
-        dto.setQuestionId(answer.getQuestionId());
+        if(answer != null) {
+            dto.setAnswer(answer.getAnswer());
+            dto.setId(answer.getId());
+            dto.setQuestionId(answer.getQuestionId());
+        }
         return dto;
     }
 }

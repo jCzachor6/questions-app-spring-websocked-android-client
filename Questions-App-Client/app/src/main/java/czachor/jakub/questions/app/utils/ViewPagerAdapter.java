@@ -37,7 +37,7 @@ public class ViewPagerAdapter extends FragmentStatePagerAdapter {
     @Nullable
     @Override
     public CharSequence getPageTitle(int position) {
-        return "Question #" + questions.get(position);
+        return "#" + questions.get(position).getId();
     }
 
     private Answer getAnswerById(Long id) {

@@ -48,7 +48,7 @@ public class WebsocketController {
         }
     }
 
-    private List<QuestionLookupDTO> questionLookupDTO() {
+    private List<QuestionDTO> questionLookupDTO() {
         return Mapper.map(this.questionService.getAll());
     }
 
