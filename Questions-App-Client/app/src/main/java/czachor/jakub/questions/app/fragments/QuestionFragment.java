@@ -17,10 +17,13 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import czachor.jakub.questions.app.AnswersApplication;
 import czachor.jakub.questions.app.R;
 import czachor.jakub.questions.app.models.AnswerDto;
 import czachor.jakub.questions.app.models.QuestionDTO;
 import czachor.jakub.questions.app.models.sqlite.Answer;
+import czachor.jakub.questions.app.models.sqlite.AnswerState;
+import czachor.jakub.questions.app.utils.AnswersView;
 
 public class QuestionFragment extends Fragment {
     private QuestionDTO questionDTO;
@@ -30,9 +33,7 @@ public class QuestionFragment extends Fragment {
     private TextView questionIdTextView;
     private TextView questionTextView;
     private TextView timerTextView;
-    private Button confirmButton;
-    private LinearLayout answersLayout;
-    private List<CheckBox> answersCheckboxList = new ArrayList<>();
+    private AnswersView answersView;
 
     public static QuestionFragment newInstance(QuestionDTO questionDTO, AnswerDto answerDto) {
         QuestionFragment f = new QuestionFragment();
@@ -54,6 +55,7 @@ public class QuestionFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_question, container, false);
         this.loadArgs();
         this.loadViews(view);
+        this.setCheckBoxes();
         return view;
     }
 
@@ -66,14 +68,25 @@ public class QuestionFragment extends Fragment {
         questionTextView.setText(questionDTO.getQuestion());
 
         timerTextView = view.findViewById(R.id.question_question_timer);
-        confirmButton = view.findViewById(R.id.question_confirm_button);
-        answersLayout = view.findViewById(R.id.answers_layout);
-        for (String answer : this.questionDTO.getAnswers()) {
-            CheckBox checkBox = new CheckBox(getContext());
-            checkBox.setText(answer);
-            answersCheckboxList.add(checkBox);
-            answersLayout.addView(checkBox);
-        }
+        answersView = new AnswersView(view, R.id.question_confirm_button, R.id.answers_layout);
+        answersView.initCheckboxes(questionDTO.getAnswers());
+        answersView.setOnConfirmButtonClickListener(v -> {
+            List<Long> checkedAnswers = answersView.getChecked();
+            new AnswersView.AnswerUtils();
+            String answerString = AnswersView.AnswerUtils.fromListToString(checkedAnswers);
+            AnswerState state =
+                    answerString
+                            .equals(AnswersView.AnswerUtils.fromListToString(questionDTO.getCorrectAnswers())) ?
+                            AnswerState.CORRECT_ANSWER : AnswerState.WRONG_ANSWER;
+            Answer answer = new Answer(
+                    null,
+                    questionDTO.getId(),
+                    answerString,
+                    AnswersView.AnswerUtils.fromListToString(this.questionDTO.getCorrectAnswers()),
+                    state.toString());
+            AnswersApplication.instance().getDaoSession().getAnswerDao().save(answer);
+            answersView.lockAll();
+        });
     }
 
     void loadArgs() {
@@ -82,7 +95,16 @@ public class QuestionFragment extends Fragment {
             this.questionDTO = (QuestionDTO) args.getSerializable("question");
             this.answerDto = (AnswerDto) args.getSerializable("answer");
             this.timer = questionDTO.getTimeInSeconds() * 1000;
-            this.startTimer();
+            if (answerDto.getQuestionId() == null) {
+                this.startTimer();
+            }
+        }
+    }
+
+    private void setCheckBoxes() {
+        if (answerDto != null && answerDto.getAnswer() != null) {
+            this.answersView.checkCheckboxes(answerDto.getAnswer());
+            this.answersView.lockAll();
         }
     }
 
@@ -96,17 +118,18 @@ public class QuestionFragment extends Fragment {
 
             @Override
             public void onFinish() {
-                disableQuestion();
+                AnswerState state = AnswerState.TIME_UP;
+                Answer answer = new Answer(
+                        null,
+                        questionDTO.getId(),
+                        "",
+                        AnswersView.AnswerUtils.fromListToString(questionDTO.getCorrectAnswers()),
+                        state.toString());
+                AnswersApplication.instance().getDaoSession().getAnswerDao().save(answer);
+                answersView.lockAll();
             }
         };
         countDownTimer.start();
-    }
-
-    private void disableQuestion() {
-        this.confirmButton.setEnabled(false);
-        for (CheckBox checkBox : this.answersCheckboxList) {
-            checkBox.setEnabled(false);
-        }
     }
 
     private void updateCountdownText() {
@@ -117,5 +140,13 @@ public class QuestionFragment extends Fragment {
 
         String timeFormatted = minutes + ":" + seconds;
         timerTextView.setText(timeFormatted);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (this.countDownTimer != null) {
+            this.countDownTimer.cancel();
+        }
     }
 }
