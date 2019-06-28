@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 
 import java.util.List;
@@ -18,6 +19,7 @@ import czachor.jakub.questions.app.models.AnswerDto;
 import czachor.jakub.questions.app.models.QuestionDTO;
 import czachor.jakub.questions.app.models.sqlite.Answer;
 import czachor.jakub.questions.app.models.sqlite.AnswerState;
+import czachor.jakub.questions.app.utils.AdminPanelView;
 import czachor.jakub.questions.app.utils.AnswersView;
 
 public class QuestionFragment extends Fragment {
@@ -29,6 +31,7 @@ public class QuestionFragment extends Fragment {
     private TextView questionTextView;
     private TextView timerTextView;
     private AnswersView answersView;
+    private AdminPanelView adminPanelView;
 
     public static QuestionFragment newInstance(QuestionDTO questionDTO, AnswerDto answerDto) {
         QuestionFragment f = new QuestionFragment();
@@ -72,6 +75,9 @@ public class QuestionFragment extends Fragment {
         answersView = new AnswersView(view, R.id.question_confirm_button, R.id.answers_layout);
         answersView.initCheckboxes(questionDTO.getAnswers());
         answersView.setOnConfirmButtonClickListener(onConfirmButtonClickListener);
+        adminPanelView = new AdminPanelView(view, R.id.unlock_question_button, R.id.show_results_button, R.id.admin_card_view);
+        adminPanelView.setOnUnlockButtonClickListener(onUnlockButtonClickListener);
+        adminPanelView.setOnResultsButtonClickListener(onResultsButtonClickListener);
     }
 
     void loadArgs() {
@@ -163,5 +169,13 @@ public class QuestionFragment extends Fragment {
                 state.toString());
         AnswersApplication.instance().getDaoSession().getAnswerDao().save(answer);
         answersView.lockAll();
+    };
+
+    private View.OnClickListener onUnlockButtonClickListener = v -> {
+        this.adminPanelView.lockUnlockButton();
+    };
+
+    private View.OnClickListener onResultsButtonClickListener = v -> {
+        this.adminPanelView.lockResultsButton();
     };
 }
