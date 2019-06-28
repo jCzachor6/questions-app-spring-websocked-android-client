@@ -7,7 +7,7 @@ import java.util.List;
 public class QuestionsMessage {
     private MessageType type;
     private List<Long> answers;
-    private Long messageId;
+    private Long questionId;
 
     public QuestionsMessage() {
     }
@@ -32,12 +32,12 @@ public class QuestionsMessage {
         this.answers = answers;
     }
 
-    public Long getMessageId() {
-        return messageId;
+    public Long getQuestionId() {
+        return questionId;
     }
 
-    public void setMessageId(Long messageId) {
-        this.messageId = messageId;
+    public void setQuestionId(Long questionId) {
+        this.questionId = questionId;
     }
 
     public String json() {

@@ -13,12 +13,14 @@ public class AdminPanelView {
     private View view;
     private Button unlockButton;
     private Button resultsButton;
+    private Button resetAllButton;
 
-    public AdminPanelView(View view, @IdRes int unlockButtonId, @IdRes int resultButtonId, @IdRes int cardViewId) {
+    public AdminPanelView(View view, @IdRes int unlockButtonId, @IdRes int resultButtonId, @IdRes int cardViewId, @IdRes int resetAllButtonId) {
         this.view = view;
         this.cardView = view.findViewById(cardViewId);
         this.unlockButton = view.findViewById(unlockButtonId);
         this.resultsButton = view.findViewById(resultButtonId);
+        this.resetAllButton = view.findViewById(resetAllButtonId);
         this.resultsButton.setEnabled(false);
         if (!AnswersApplication.instance().role().equals("ADMIN")) {
             this.cardView.setVisibility(View.GONE);
@@ -33,12 +35,19 @@ public class AdminPanelView {
         this.resultsButton.setOnClickListener(onResultsButtonClickListener);
     }
 
+    public void setOnResetAllButtonClickListener(View.OnClickListener onResetAllButtonClickListener){
+        this.resetAllButton.setOnClickListener(onResetAllButtonClickListener);
+    }
+
     public void lockUnlockButton(){
         this.unlockButton.setEnabled(false);
-        this.resultsButton.setEnabled(true);
     }
 
     public void lockResultsButton(){
         this.resultsButton.setEnabled(false);
+    }
+
+    public void unlockResultsButton(){
+        this.resultsButton.setEnabled(true);
     }
 }

@@ -16,7 +16,9 @@ import java.util.List;
 import czachor.jakub.questions.app.AnswersApplication;
 import czachor.jakub.questions.app.R;
 import czachor.jakub.questions.app.models.AnswerDto;
+import czachor.jakub.questions.app.models.MessageType;
 import czachor.jakub.questions.app.models.QuestionDTO;
+import czachor.jakub.questions.app.models.QuestionsMessage;
 import czachor.jakub.questions.app.models.sqlite.Answer;
 import czachor.jakub.questions.app.models.sqlite.AnswerState;
 import czachor.jakub.questions.app.utils.AdminPanelView;
@@ -56,6 +58,7 @@ public class QuestionFragment extends Fragment {
         if (AnswersApplication.instance().role().equals("USER")) {
             this.startTimer();
             this.setCheckBoxes();
+            this.updateCountdownText();
         } else if (AnswersApplication.instance().role().equals("ADMIN")) {
             this.updateCountdownText();
             this.setCorrectCheckBoxes();
@@ -75,9 +78,10 @@ public class QuestionFragment extends Fragment {
         answersView = new AnswersView(view, R.id.question_confirm_button, R.id.answers_layout);
         answersView.initCheckboxes(questionDTO.getAnswers());
         answersView.setOnConfirmButtonClickListener(onConfirmButtonClickListener);
-        adminPanelView = new AdminPanelView(view, R.id.unlock_question_button, R.id.show_results_button, R.id.admin_card_view);
+        adminPanelView = new AdminPanelView(view, R.id.unlock_question_button, R.id.show_results_button, R.id.admin_card_view, R.id.reset_all_button);
         adminPanelView.setOnUnlockButtonClickListener(onUnlockButtonClickListener);
         adminPanelView.setOnResultsButtonClickListener(onResultsButtonClickListener);
+        adminPanelView.setOnResetAllButtonClickListener(onResetButtonClickListener);
     }
 
     void loadArgs() {
@@ -114,7 +118,9 @@ public class QuestionFragment extends Fragment {
 
                 @Override
                 public void onFinish() {
-                    saveTimeUpAnswer();
+                    if (!answersView.getLocked()) {
+                        saveTimeUpAnswer();
+                    }
                     answersView.lockAll();
                 }
             };
@@ -155,7 +161,6 @@ public class QuestionFragment extends Fragment {
 
     private View.OnClickListener onConfirmButtonClickListener = v -> {
         List<Long> checkedAnswers = answersView.getChecked();
-        new AnswersView.AnswerUtils();
         String answerString = AnswersView.AnswerUtils.fromListToString(checkedAnswers);
         AnswerState state =
                 answerString
@@ -173,9 +178,20 @@ public class QuestionFragment extends Fragment {
 
     private View.OnClickListener onUnlockButtonClickListener = v -> {
         this.adminPanelView.lockUnlockButton();
+        this.adminPanelView.unlockResultsButton();
+        QuestionsMessage message = new QuestionsMessage(MessageType.UNLOCK);
+        message.setQuestionId(questionDTO.getId());
+        AnswersApplication.instance().getStompClient().send("/topic/questions", message.json()).subscribe();
+
     };
 
     private View.OnClickListener onResultsButtonClickListener = v -> {
         this.adminPanelView.lockResultsButton();
+    };
+
+
+    private View.OnClickListener onResetButtonClickListener = v -> {
+        QuestionsMessage message = new QuestionsMessage(MessageType.RESET);
+        AnswersApplication.instance().getStompClient().send("/topic/questions", message.json()).subscribe();
     };
 }

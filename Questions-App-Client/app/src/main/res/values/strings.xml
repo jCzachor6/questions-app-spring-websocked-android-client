@@ -3,4 +3,6 @@
     <string name="confirm">Confirm</string>
     <string name="unlock_question">UNLOCK</string>
     <string name="show_results">RESULTS</string>
+    <string name="reset">RESET</string>
+    <string name="admin_options">Admin options:</string>
 </resources>

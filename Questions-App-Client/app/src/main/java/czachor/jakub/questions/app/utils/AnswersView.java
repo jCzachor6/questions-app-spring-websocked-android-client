@@ -17,6 +17,7 @@ public class AnswersView {
     private List<CheckBox> answersCheckboxList = new ArrayList<>();
     private View view;
     private Button confirmButton;
+    private Boolean isLocked = false;
 
     public AnswersView(View view, @IdRes int buttonId, @IdRes int linearLayoutId) {
         this.view = view;
@@ -41,6 +42,7 @@ public class AnswersView {
         for (CheckBox checkBox : this.answersCheckboxList) {
             checkBox.setEnabled(false);
         }
+        this.isLocked = true;
     }
 
     public void checkCheckboxes(String answer) {
@@ -95,5 +97,9 @@ public class AnswersView {
 
     public void setOnConfirmButtonClickListener(View.OnClickListener onConfirmButtonClickListener) {
         this.confirmButton.setOnClickListener(onConfirmButtonClickListener);
+    }
+
+    public Boolean getLocked() {
+        return isLocked;
     }
 }

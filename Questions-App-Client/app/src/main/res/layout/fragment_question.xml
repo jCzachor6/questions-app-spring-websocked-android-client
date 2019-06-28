@@ -32,32 +32,37 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <TextView
+            <Button
+                android:id="@+id/reset_all_button"
+                style="@style/Widget.MaterialComponents.Button.UnelevatedButton.Icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Admin options: "
+                android:text="@string/reset"
                 android:textAlignment="center"
-                android:textSize="20sp" />
+                android:textSize="12sp"
+                android:textStyle="bold" />
 
             <Button
                 android:id="@+id/show_results_button"
                 style="@style/Widget.MaterialComponents.Button.UnelevatedButton.Icon"
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_weight="1"
                 android:text="@string/show_results"
                 android:textAlignment="center"
-                android:textSize="15sp"
+                android:textSize="12sp"
                 android:textStyle="bold" />
 
             <Button
                 android:id="@+id/unlock_question_button"
                 style="@style/Widget.MaterialComponents.Button.UnelevatedButton.Icon"
                 android:layout_width="wrap_content"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:text="@string/unlock_question"
                 android:textAlignment="center"
-                android:textSize="15sp"
+                android:textSize="12sp"
                 android:textStyle="bold" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>

@@ -1,6 +1,7 @@
 package czachor.jakub.quesionsapp.server.repository;
 
 import czachor.jakub.quesionsapp.server.models.AnswerHolder;
+import czachor.jakub.quesionsapp.server.models.QuestionState;
 import czachor.jakub.quesionsapp.server.util.QuestionsLoader;
 import org.springframework.stereotype.Repository;
 
@@ -14,6 +15,10 @@ public class QuestionRepository {
 
     public List<AnswerHolder> getAll() {
         return this.questions;
+    }
+
+    public List<AnswerHolder> getUnlocked() {
+        return this.questions.stream().filter( q -> !q.getState().equals(QuestionState.LOCKED)).collect(Collectors.toList());
     }
 
     public Optional<AnswerHolder> getById(Long id) {

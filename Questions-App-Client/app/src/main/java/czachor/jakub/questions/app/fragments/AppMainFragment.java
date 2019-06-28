@@ -43,7 +43,8 @@ public class AppMainFragment extends Fragment {
     }
 
     private void subscribe(View view) {
-        AnswersApplication.instance().getSubscriptions().addSubscription("/questions/", topicMessage -> {
+        String role = AnswersApplication.instance().role();
+        AnswersApplication.instance().getSubscriptions().addSubscription("/questions/" + role, topicMessage -> {
             questions = new Gson().fromJson(topicMessage.getPayload(), new TypeToken<List<QuestionDTO>>() {
             }.getType());
             this.loadViewPager(view);
