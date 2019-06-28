@@ -26,30 +26,36 @@ public class WebsocketController {
         System.out.println("Received message: " + message);
         switch (message.getType()) {
             case ALL:
-                this.simpMessagingTemplate.convertAndSend("/questions/", this.questionLookupDTO());
+                this.simpMessagingTemplate.convertAndSend("/questions/USER", this.unlockedQuestionDTOs());
+                this.simpMessagingTemplate.convertAndSend("/questions/ADMIN", this.questionDTOs());
                 break;
             case SINGLE:
-                QuestionDTO singleDto = Mapper.map(questionService.getById(message.getMessageId()));
-                this.simpMessagingTemplate.convertAndSend("/questions/" + message.getMessageId(), singleDto);
+                QuestionDTO singleDto = Mapper.map(questionService.getById(message.getQuestionId()));
+                this.simpMessagingTemplate.convertAndSend("/questions/" + message.getQuestionId(), singleDto);
                 break;
             case UNLOCK:
-                this.questionService.unlockById(message.getMessageId());
-                this.simpMessagingTemplate.convertAndSend("/questions/", this.questionLookupDTO());
+                this.questionService.unlockById(message.getQuestionId());
+                this.simpMessagingTemplate.convertAndSend("/questions/USER", this.unlockedQuestionDTOs());
                 break;
             case ANSWER:
-                this.questionService.addAnswer(message.getMessageId(), message.getAnswers());
-                QuestionDTO answered = Mapper.map(questionService.getById(message.getMessageId()));
-                this.simpMessagingTemplate.convertAndSend("/questions/" + message.getMessageId(), answered);
+                this.questionService.addAnswer(message.getQuestionId(), message.getAnswers());
+                QuestionDTO answered = Mapper.map(questionService.getById(message.getQuestionId()));
+                this.simpMessagingTemplate.convertAndSend("/questions/" + message.getQuestionId(), answered);
                 break;
             case RESET:
                 this.questionService.resetAll();
-                this.simpMessagingTemplate.convertAndSend("/questions/", this.questionLookupDTO());
+                this.simpMessagingTemplate.convertAndSend("/questions/USER", this.unlockedQuestionDTOs());
+                this.simpMessagingTemplate.convertAndSend("/questions/ADMIN", this.questionDTOs());
                 break;
         }
     }
 
-    private List<QuestionDTO> questionLookupDTO() {
+    private List<QuestionDTO> questionDTOs() {
         return Mapper.map(this.questionService.getAll());
+    }
+
+    private List<QuestionDTO> unlockedQuestionDTOs() {
+        return Mapper.map(this.questionService.getUnlocked());
     }
 
 }

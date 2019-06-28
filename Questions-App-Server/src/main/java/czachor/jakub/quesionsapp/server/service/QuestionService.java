@@ -20,6 +20,10 @@ public class QuestionService {
         return questionRepository.getAll();
     }
 
+    public List<AnswerHolder> getUnlocked() {
+        return questionRepository.getUnlocked();
+    }
+
     public AnswerHolder getById(Long id) {
         return questionRepository.getById(id).orElse(null);
     }

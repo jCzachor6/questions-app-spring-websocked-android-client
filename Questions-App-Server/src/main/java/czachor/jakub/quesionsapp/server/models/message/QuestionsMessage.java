@@ -12,5 +12,5 @@ import java.util.List;
 public class QuestionsMessage {
     private MessageType type;
     private List<Long> answers;
-    private Long messageId;
+    private Long questionId;
 }
