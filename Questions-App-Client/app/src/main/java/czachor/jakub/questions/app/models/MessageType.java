@@ -5,5 +5,6 @@ public enum  MessageType {
     SINGLE,
     UNLOCK,
     ANSWER,
+    RESULTS,
     RESET
 }
