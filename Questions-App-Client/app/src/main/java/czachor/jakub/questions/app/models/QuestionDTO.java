@@ -11,7 +11,7 @@ public class QuestionDTO implements Serializable {
     private List<Long> correctAnswers;
     private Long timeInSeconds;
     private QuestionState state;
-    private Map<List<Long>, Long> answered;
+    private Map<String, Long> answered;
 
     public Long getId() {
         return id;
@@ -61,11 +61,11 @@ public class QuestionDTO implements Serializable {
         this.state = state;
     }
 
-    public Map<List<Long>, Long> getAnswered() {
+    public Map<String, Long> getAnswered() {
         return answered;
     }
 
-    public void setAnswered(Map<List<Long>, Long> answered) {
+    public void setAnswered(Map<String, Long> answered) {
         this.answered = answered;
     }
 }

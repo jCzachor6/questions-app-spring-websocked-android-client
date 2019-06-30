@@ -157,6 +157,12 @@ public class QuestionFragment extends Fragment {
     }
 
     private View.OnClickListener onConfirmButtonClickListener = v -> {
+        this.saveInDatabase();
+        this.sendAnswersMessage();
+        answersView.lockAll();
+    };
+
+    private void saveInDatabase() {
         List<Long> checkedAnswers = answersView.getChecked();
         String answerString = AnswersView.AnswerUtils.fromListToString(checkedAnswers);
         AnswerState state =
@@ -170,8 +176,7 @@ public class QuestionFragment extends Fragment {
                 AnswersView.AnswerUtils.fromListToString(this.questionDTO.getCorrectAnswers()),
                 state.toString());
         AnswersApplication.instance().getDaoSession().getAnswerDao().save(answer);
-        answersView.lockAll();
-    };
+    }
 
     private View.OnClickListener onUnlockButtonClickListener = v -> {
         this.adminPanelView.lockUnlockButton();
@@ -193,6 +198,13 @@ public class QuestionFragment extends Fragment {
     private void sendMessage(MessageType type) {
         QuestionsMessage message = new QuestionsMessage(type);
         message.setQuestionId(questionDTO.getId());
+        AnswersApplication.instance().getStompClient().send("/topic/questions", message.json()).subscribe();
+    }
+
+    private void sendAnswersMessage() {
+        QuestionsMessage message = new QuestionsMessage(MessageType.ANSWER);
+        message.setQuestionId(questionDTO.getId());
+        message.setAnswers(this.answersView.getChecked());
         AnswersApplication.instance().getStompClient().send("/topic/questions", message.json()).subscribe();
     }
 }

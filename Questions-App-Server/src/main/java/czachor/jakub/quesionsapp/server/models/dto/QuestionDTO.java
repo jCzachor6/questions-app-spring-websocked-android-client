@@ -14,5 +14,5 @@ public class QuestionDTO {
     private List<Long> correctAnswers;
     private Long timeInSeconds;
     private QuestionState state;
-    private Map<List<Long>, Long> answered;
+    private Map<String, Long> answered;
 }
