@@ -44,10 +44,8 @@ public class QuestionFragment extends Fragment {
         return f;
     }
 
-
     public QuestionFragment() {
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -58,11 +56,10 @@ public class QuestionFragment extends Fragment {
         if (AnswersApplication.instance().role().equals("USER")) {
             this.startTimer();
             this.setCheckBoxes();
-            this.updateCountdownText();
         } else if (AnswersApplication.instance().role().equals("ADMIN")) {
-            this.updateCountdownText();
             this.setCorrectCheckBoxes();
         }
+        this.updateCountdownText();
         return view;
     }
 
@@ -179,19 +176,23 @@ public class QuestionFragment extends Fragment {
     private View.OnClickListener onUnlockButtonClickListener = v -> {
         this.adminPanelView.lockUnlockButton();
         this.adminPanelView.unlockResultsButton();
-        QuestionsMessage message = new QuestionsMessage(MessageType.UNLOCK);
-        message.setQuestionId(questionDTO.getId());
-        AnswersApplication.instance().getStompClient().send("/topic/questions", message.json()).subscribe();
-
+        this.sendMessage(MessageType.UNLOCK);
+        this.startTimer();
     };
 
     private View.OnClickListener onResultsButtonClickListener = v -> {
+        this.sendMessage(MessageType.RESULTS);
+        this.adminPanelView.lockUnlockButton();
         this.adminPanelView.lockResultsButton();
     };
 
-
     private View.OnClickListener onResetButtonClickListener = v -> {
-        QuestionsMessage message = new QuestionsMessage(MessageType.RESET);
-        AnswersApplication.instance().getStompClient().send("/topic/questions", message.json()).subscribe();
+        this.sendMessage(MessageType.RESET);
     };
+
+    private void sendMessage(MessageType type) {
+        QuestionsMessage message = new QuestionsMessage(type);
+        message.setQuestionId(questionDTO.getId());
+        AnswersApplication.instance().getStompClient().send("/topic/questions", message.json()).subscribe();
+    }
 }

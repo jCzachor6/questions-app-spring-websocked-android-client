@@ -32,6 +32,10 @@ public class QuestionService {
         questionRepository.getById(id).orElse(null).setState(QuestionState.ACTIVE);
     }
 
+    public void unlockToResultsById(Long id) {
+        questionRepository.getById(id).orElse(null).setState(QuestionState.SHOW_ANSWERS);
+    }
+
     public void addAnswer(Long messageId, List<Long> answers) {
         AnswerHolder holder = getById(messageId);
         answers.sort(Comparator.comparingLong(Long::longValue));

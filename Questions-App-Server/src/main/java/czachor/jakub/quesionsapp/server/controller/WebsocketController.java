@@ -1,7 +1,8 @@
 package czachor.jakub.quesionsapp.server.controller;
 
+import czachor.jakub.quesionsapp.server.models.AnswerHolder;
+import czachor.jakub.quesionsapp.server.models.QuestionState;
 import czachor.jakub.quesionsapp.server.models.dto.QuestionDTO;
-import czachor.jakub.quesionsapp.server.models.dto.QuestionLookupDTO;
 import czachor.jakub.quesionsapp.server.models.message.QuestionsMessage;
 import czachor.jakub.quesionsapp.server.service.QuestionService;
 import czachor.jakub.quesionsapp.server.util.Mapper;
@@ -10,6 +11,9 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Controller
 public class WebsocketController {
@@ -30,17 +34,20 @@ public class WebsocketController {
                 this.simpMessagingTemplate.convertAndSend("/questions/ADMIN", this.questionDTOs());
                 break;
             case SINGLE:
-                QuestionDTO singleDto = Mapper.map(questionService.getById(message.getQuestionId()));
-                this.simpMessagingTemplate.convertAndSend("/questions/" + message.getQuestionId(), singleDto);
+                this.simpMessagingTemplate.convertAndSend("/questions/" + message.getQuestionId(), getOne(message.getQuestionId()));
                 break;
             case UNLOCK:
                 this.questionService.unlockById(message.getQuestionId());
                 this.simpMessagingTemplate.convertAndSend("/questions/USER", this.unlockedQuestionDTOs());
+                this.lockAfterTime(questionService.getById(message.getQuestionId()));
                 break;
             case ANSWER:
                 this.questionService.addAnswer(message.getQuestionId(), message.getAnswers());
-                QuestionDTO answered = Mapper.map(questionService.getById(message.getQuestionId()));
-                this.simpMessagingTemplate.convertAndSend("/questions/" + message.getQuestionId(), answered);
+                this.simpMessagingTemplate.convertAndSend("/questions/" + message.getQuestionId(), getOne(message.getQuestionId()));
+                break;
+            case RESULTS:
+                this.questionService.unlockToResultsById(message.getQuestionId());
+                this.simpMessagingTemplate.convertAndSend("/questions/" + message.getQuestionId(), getOne(message.getQuestionId()));
                 break;
             case RESET:
                 this.questionService.resetAll();
@@ -58,4 +65,16 @@ public class WebsocketController {
         return Mapper.map(this.questionService.getUnlocked());
     }
 
+    private QuestionDTO getOne(Long id) {
+        return Mapper.map(questionService.getById(id));
+    }
+
+    private void lockAfterTime(AnswerHolder answerHolder) {
+        final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+        executorService.schedule(() -> {
+            answerHolder.setState(QuestionState.TIME_UP);
+            QuestionDTO afterTime = Mapper.map(questionService.getById(answerHolder.getQuestion().getId()));
+            this.simpMessagingTemplate.convertAndSend("/questions/" + answerHolder.getQuestion().getId(), afterTime);
+        }, answerHolder.getQuestion().getTimeInSeconds(), TimeUnit.SECONDS);
+    }
 }

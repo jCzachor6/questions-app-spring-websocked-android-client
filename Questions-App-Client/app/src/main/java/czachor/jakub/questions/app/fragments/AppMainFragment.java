@@ -13,8 +13,10 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import czachor.jakub.questions.app.AnswersApplication;
 import czachor.jakub.questions.app.R;
@@ -24,7 +26,7 @@ import czachor.jakub.questions.app.models.QuestionsMessage;
 import czachor.jakub.questions.app.utils.ViewPagerAdapter;
 
 public class AppMainFragment extends Fragment {
-    private List<QuestionDTO> questions = Collections.emptyList();
+    private List<QuestionDTO> questions = new ArrayList<>();
     private ViewPager viewPager;
     private ViewPagerAdapter myPagerAdapter;
     private TabLayout tabLayout;
@@ -45,18 +47,51 @@ public class AppMainFragment extends Fragment {
     private void subscribe(View view) {
         String role = AnswersApplication.instance().role();
         AnswersApplication.instance().getSubscriptions().addSubscription("/questions/" + role, topicMessage -> {
-            questions = new Gson().fromJson(topicMessage.getPayload(), new TypeToken<List<QuestionDTO>>() {
+            List<QuestionDTO> retreived = new Gson().fromJson(topicMessage.getPayload(), new TypeToken<List<QuestionDTO>>() {
             }.getType());
-            this.loadViewPager(view);
+            if (role.equals("USER")) {
+                if (retreived.size() > 0) {
+                    QuestionDTO questionDTO = findDifference(retreived, questions);
+                    getActivity().runOnUiThread(() -> myPagerAdapter.addElement(questionDTO));
+                    int position = myPagerAdapter.getPositionById(questionDTO.getId());
+                    viewPager.postDelayed(() -> viewPager.setCurrentItem(position, true), 100);
+                } else {
+                    getActivity().runOnUiThread(() -> myPagerAdapter.removeAll());
+                }
+            } else if (role.equals("ADMIN")) {
+                this.questions = retreived;
+                loadViewPager(view);
+            }
         });
         QuestionsMessage message = new QuestionsMessage(MessageType.ALL);
         AnswersApplication.instance().getStompClient().send("/topic/questions", message.json()).subscribe();
+    }
+
+    private QuestionDTO findDifference(List<QuestionDTO> listOne, List<QuestionDTO> listTwo) {
+        List<Long> idsOne = new ArrayList<>();
+        for (QuestionDTO dto : listOne) {
+            idsOne.add(dto.getId());
+        }
+        List<Long> idsTwo = new ArrayList<>();
+        for (QuestionDTO dto : listTwo) {
+            idsTwo.add(dto.getId());
+        }
+        idsOne.removeAll(idsTwo);
+        if (idsOne.size() > 0) {
+            for (QuestionDTO dto : listOne) {
+                if (dto.getId().equals(idsOne.get(0))) {
+                    return dto;
+                }
+            }
+        }
+        return null;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_app_main, container, false);
+        this.loadViewPager(view);
         this.subscribe(view);
         return view;
     }
