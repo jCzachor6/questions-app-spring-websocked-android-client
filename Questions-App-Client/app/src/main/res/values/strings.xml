@@ -5,4 +5,5 @@
     <string name="show_results">RESULTS</string>
     <string name="reset">RESET ALL</string>
     <string name="admin_options">Admin options:</string>
+    <string name="results">Results:</string>
 </resources>
