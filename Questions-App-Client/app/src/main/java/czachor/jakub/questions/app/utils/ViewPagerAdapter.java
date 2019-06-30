@@ -1,6 +1,7 @@
 package czachor.jakub.questions.app.utils;
 
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -30,6 +31,11 @@ public class ViewPagerAdapter extends FragmentStatePagerAdapter {
     }
 
     @Override
+    public int getItemPosition(@NonNull Object object) {
+        return POSITION_NONE;
+    }
+
+    @Override
     public int getCount() {
         return questions.size();
     }
@@ -47,6 +53,30 @@ public class ViewPagerAdapter extends FragmentStatePagerAdapter {
                 .getAnswerDao()
                 .queryBuilder()
                 .where(AnswerDao.Properties.QuestionId.eq(id))
+                .limit(1)
                 .unique();
+    }
+
+    public List<QuestionDTO> getQuestions() {
+        return questions;
+    }
+
+    public void addElement(QuestionDTO dto) {
+        this.questions.add(dto);
+        this.notifyDataSetChanged();
+    }
+
+    public void removeAll() {
+        this.questions.clear();
+        this.notifyDataSetChanged();
+    }
+
+    public int getPositionById(Long id) {
+        for (int i = 0; i < this.questions.size(); i++) {
+            if (this.questions.get(i).getId().equals(id)) {
+                return i;
+            }
+        }
+        return questions.size();
     }
 }
