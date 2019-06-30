@@ -47,11 +47,12 @@ public class AppMainFragment extends Fragment {
     private void subscribe(View view) {
         String role = AnswersApplication.instance().role();
         AnswersApplication.instance().getSubscriptions().addSubscription("/questions/" + role, topicMessage -> {
-            List<QuestionDTO> retreived = new Gson().fromJson(topicMessage.getPayload(), new TypeToken<List<QuestionDTO>>() {
+            System.out.println(topicMessage);
+            List<QuestionDTO> retrieved = new Gson().fromJson(topicMessage.getPayload(), new TypeToken<List<QuestionDTO>>() {
             }.getType());
             if (role.equals("USER")) {
-                if (retreived.size() > 0) {
-                    QuestionDTO questionDTO = findDifference(retreived, questions);
+                if (retrieved.size() > 0) {
+                    QuestionDTO questionDTO = findDifference(retrieved, questions);
                     getActivity().runOnUiThread(() -> myPagerAdapter.addElement(questionDTO));
                     int position = myPagerAdapter.getPositionById(questionDTO.getId());
                     viewPager.postDelayed(() -> viewPager.setCurrentItem(position, true), 100);
@@ -59,7 +60,7 @@ public class AppMainFragment extends Fragment {
                     getActivity().runOnUiThread(() -> myPagerAdapter.removeAll());
                 }
             } else if (role.equals("ADMIN")) {
-                this.questions = retreived;
+                this.questions = retrieved;
                 loadViewPager(view);
             }
         });
