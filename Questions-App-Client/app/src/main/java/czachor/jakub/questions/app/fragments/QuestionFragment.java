@@ -1,6 +1,8 @@
 package czachor.jakub.questions.app.fragments;
 
 
+import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.LayoutInflater;
@@ -11,20 +13,29 @@ import android.widget.TextView;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 
+import com.google.gson.Gson;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import czachor.jakub.questions.app.AnswersApplication;
 import czachor.jakub.questions.app.R;
 import czachor.jakub.questions.app.models.AnswerDto;
 import czachor.jakub.questions.app.models.MessageType;
 import czachor.jakub.questions.app.models.QuestionDTO;
+import czachor.jakub.questions.app.models.QuestionState;
 import czachor.jakub.questions.app.models.QuestionsMessage;
 import czachor.jakub.questions.app.models.sqlite.Answer;
 import czachor.jakub.questions.app.models.sqlite.AnswerState;
 import czachor.jakub.questions.app.utils.AdminPanelView;
 import czachor.jakub.questions.app.utils.AnswersView;
+import lecho.lib.hellocharts.model.PieChartData;
+import lecho.lib.hellocharts.model.SliceValue;
+import lecho.lib.hellocharts.view.PieChartView;
 
 public class QuestionFragment extends Fragment {
+    private Activity activity;
     private QuestionDTO questionDTO;
     private AnswerDto answerDto;
     private Long timer = 0L;
@@ -34,6 +45,15 @@ public class QuestionFragment extends Fragment {
     private TextView timerTextView;
     private AnswersView answersView;
     private AdminPanelView adminPanelView;
+    private CardView resultsCardView;
+    private PieChartView pieChartView;
+    private int[] colors = {
+            R.color.col1, R.color.col2, R.color.col3, R.color.col4,
+            R.color.col5, R.color.col6, R.color.col7, R.color.col8,
+            R.color.col9, R.color.col10, R.color.col11, R.color.col12,
+            R.color.col13, R.color.col14, R.color.col15
+    };
+
 
     public static QuestionFragment newInstance(QuestionDTO questionDTO, AnswerDto answerDto) {
         QuestionFragment f = new QuestionFragment();
@@ -60,7 +80,30 @@ public class QuestionFragment extends Fragment {
             this.setCorrectCheckBoxes();
         }
         this.updateCountdownText();
+        this.subscribe();
         return view;
+    }
+
+    private void subscribe() {
+        AnswersApplication.instance().getSubscriptions().addSubscription("/question/" + questionDTO.getId(), topicMessage -> {
+            QuestionDTO retrieved = new Gson().fromJson(topicMessage.getPayload(), QuestionDTO.class);
+            if (retrieved.getState().equals(QuestionState.SHOW_ANSWERS)) {
+                activity.runOnUiThread(() -> {
+                    this.resultsCardView.setVisibility(View.VISIBLE);
+                    List<SliceValue> pieData = new ArrayList<>();
+                    int i = 0;
+                    for (Map.Entry<String, Long> entry : retrieved.getAnswered().entrySet()) {
+                        pieData.add(new SliceValue(entry.getValue(), colors[i]).setLabel(entry.getKey()));
+                        i++;
+                    }
+                    PieChartData pieChartData = new PieChartData(pieData);
+                    pieChartData.setHasLabels(true).setValueLabelTextSize(15);
+                    pieChartData.setHasCenterCircle(true)
+                            .setCenterText1("Correct: " + AnswersView.AnswerUtils.fromListToString(retrieved.getCorrectAnswers()));
+                    pieChartView.setPieChartData(pieChartData);
+                });
+            }
+        });
     }
 
     private void loadViews(View view) {
@@ -79,6 +122,12 @@ public class QuestionFragment extends Fragment {
         adminPanelView.setOnUnlockButtonClickListener(onUnlockButtonClickListener);
         adminPanelView.setOnResultsButtonClickListener(onResultsButtonClickListener);
         adminPanelView.setOnResetAllButtonClickListener(onResetButtonClickListener);
+
+        resultsCardView = view.findViewById(R.id.result_card_view);
+        if (AnswersApplication.instance().role().equals("USER")) {
+            this.resultsCardView.setVisibility(View.GONE);
+        }
+        pieChartView = view.findViewById(R.id.chart);
     }
 
     void loadArgs() {
@@ -206,5 +255,9 @@ public class QuestionFragment extends Fragment {
         message.setQuestionId(questionDTO.getId());
         message.setAnswers(this.answersView.getChecked());
         AnswersApplication.instance().getStompClient().send("/topic/questions", message.json()).subscribe();
+    }
+
+    public void setActivity(Activity activity) {
+        this.activity = activity;
     }
 }

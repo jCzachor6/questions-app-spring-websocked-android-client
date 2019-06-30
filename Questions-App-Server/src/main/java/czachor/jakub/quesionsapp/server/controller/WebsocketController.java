@@ -34,7 +34,7 @@ public class WebsocketController {
                 this.simpMessagingTemplate.convertAndSend("/questions/ADMIN", this.questionDTOs());
                 break;
             case SINGLE:
-                this.simpMessagingTemplate.convertAndSend("/questions/" + message.getQuestionId(), getOne(message.getQuestionId()));
+                this.simpMessagingTemplate.convertAndSend("/question/" + message.getQuestionId(), getOne(message.getQuestionId()));
                 break;
             case UNLOCK:
                 this.questionService.unlockById(message.getQuestionId());
@@ -43,11 +43,11 @@ public class WebsocketController {
                 break;
             case ANSWER:
                 this.questionService.addAnswer(message.getQuestionId(), message.getAnswers());
-                this.simpMessagingTemplate.convertAndSend("/questions/" + message.getQuestionId(), getOne(message.getQuestionId()));
+                this.simpMessagingTemplate.convertAndSend("/question/" + message.getQuestionId(), getOne(message.getQuestionId()));
                 break;
             case RESULTS:
                 this.questionService.unlockToResultsById(message.getQuestionId());
-                this.simpMessagingTemplate.convertAndSend("/questions/" + message.getQuestionId(), getOne(message.getQuestionId()));
+                this.simpMessagingTemplate.convertAndSend("/question/" + message.getQuestionId(), getOne(message.getQuestionId()));
                 break;
             case RESET:
                 this.questionService.resetAll();

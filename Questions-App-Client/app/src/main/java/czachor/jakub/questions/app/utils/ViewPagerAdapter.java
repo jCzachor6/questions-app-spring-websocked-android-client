@@ -1,6 +1,8 @@
 package czachor.jakub.questions.app.utils;
 
 
+import android.app.Activity;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -17,17 +19,21 @@ import czachor.jakub.questions.app.models.sqlite.AnswerDao;
 
 public class ViewPagerAdapter extends FragmentStatePagerAdapter {
     private List<QuestionDTO> questions;
+    private Activity activity;
 
-    public ViewPagerAdapter(FragmentManager fm, List<QuestionDTO> questions) {
+    public ViewPagerAdapter(FragmentManager fm, List<QuestionDTO> questions, Activity activity) {
         super(fm);
         this.questions = questions;
+        this.activity = activity;
     }
 
     @Override
     public Fragment getItem(int position) {
         QuestionDTO q = questions.get(position);
         Answer answer = getAnswerById(q.getId());
-        return QuestionFragment.newInstance(questions.get(position), Mapper.map(answer));
+        QuestionFragment fragment = QuestionFragment.newInstance(questions.get(position), Mapper.map(answer));
+        fragment.setActivity(activity);
+        return fragment;
     }
 
     @Override
